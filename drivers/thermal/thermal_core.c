@@ -39,6 +39,7 @@
 #include <net/genetlink.h>
 #include <linux/suspend.h>
 #include <linux/kobject.h>
+#include <../base/base.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/thermal.h>
@@ -461,7 +462,7 @@ static void handle_critical_trips(struct thermal_zone_device *tz,
 	}
 }
 
-static void handle_thermal_trip(struct thermal_zone_device *tz, int trip)
+void handle_thermal_trip(struct thermal_zone_device *tz, int trip)
 {
 	enum thermal_trip_type type;
 
@@ -626,12 +627,12 @@ static void thermal_zone_device_reset(struct thermal_zone_device *tz)
 }
 
 void thermal_zone_device_update_temp(struct thermal_zone_device *tz,
-				enum thermal_notify_event event, int temp)
+				     enum thermal_notify_event event, int temp)
 {
 	int count;
 
 	if (atomic_read(&in_suspend) && (!tz->ops->is_wakeable ||
-		!(tz->ops->is_wakeable(tz))))
+					 !(tz->ops->is_wakeable(tz))))
 		return;
 
 	trace_thermal_device_update(tz, event);
@@ -1860,6 +1861,17 @@ __thermal_cooling_device_register(struct device_node *np,
 	if (cdev_softlink_kobj == NULL) {
 		cdev_softlink_kobj = kobject_create_and_add("cdev-by-name",
 						cdev->device.kobj.parent);
+<<<<<<< HEAD
+=======
+		result = sysfs_create_link(&cdev->device.class->p->subsys.kobj,
+							cdev_softlink_kobj,
+							"cdev-by-name");
+		if (result) {
+			dev_err(&cdev->device,
+				"Fail to create cdev_map "
+				"soft link in class\n");
+		}
+>>>>>>> c29a6a529b63... drivers: thermal: Evaluate based on trip temperature
 	}
 	mutex_unlock(&cdev_softlink_lock);
 
@@ -2352,6 +2364,16 @@ struct thermal_zone_device *thermal_zone_device_register(const char *type,
 	if (tz_softlink_kobj == NULL) {
 		tz_softlink_kobj = kobject_create_and_add("tz-by-name",
 						tz->device.kobj.parent);
+<<<<<<< HEAD
+=======
+		result = sysfs_create_link(&tz->device.class->p->subsys.kobj,
+							tz_softlink_kobj,
+							"tz-by-name");
+		if (result) {
+			dev_err(&tz->device,
+				"Fail to create tz_map soft link in class\n");
+		}
+>>>>>>> c29a6a529b63... drivers: thermal: Evaluate based on trip temperature
 	}
 	mutex_unlock(&tz_softlink_lock);
 
