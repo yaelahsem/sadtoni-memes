@@ -8154,13 +8154,6 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 			cpumask_test_cpu(cpu, tsk_cpus_allowed(p)));
 	}
 
-	if (energy_aware()) {
-		new_cpu = find_energy_efficient_cpu(p, prev_cpu);
-		if (new_cpu >= 0)
-			return new_cpu;
-		new_cpu = prev_cpu;
-	}
-
 	rcu_read_lock();
 	for_each_domain(cpu, tmp) {
 		if (!(tmp->flags & SD_LOAD_BALANCE))
