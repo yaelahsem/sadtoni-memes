@@ -425,6 +425,11 @@ static const struct fg_pt fg_tsmc_osc_table[] = {
 	{  90,		444992 },
 };
 
+struct fg_saved_data {
+	union power_supply_propval val;
+	unsigned long last_req_expires;
+};
+
 struct fg_chip {
 	struct thermal_zone_device	*tz_dev;
 	struct device		*dev;
@@ -513,6 +518,7 @@ struct fg_chip {
 	struct work_struct	esr_sw_work;
 	struct delayed_work	ttf_work;
 	struct delayed_work	sram_dump_work;
+	struct fg_saved_data	saved_data[POWER_SUPPLY_PROP_MAX];
 	struct delayed_work	pl_enable_work;
 	struct work_struct	esr_filter_work;
 	struct alarm		esr_filter_alarm;
