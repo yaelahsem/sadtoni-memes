@@ -2776,7 +2776,7 @@ static inline void update_cfs_shares(struct sched_entity *se)
 }
 #endif /* CONFIG_FAIR_GROUP_SCHED */
 
-#ifdef CONFIG_SMP
+#ifdef CONFIG_SCHED_WALT
 u32 sched_get_wake_up_idle(struct task_struct *p)
 {
 	u32 enabled = p->flags & PF_WAKE_UP_IDLE;
@@ -2797,7 +2797,9 @@ int sched_set_wake_up_idle(struct task_struct *p, int wake_up_idle)
 	return 0;
 }
 EXPORT_SYMBOL(sched_set_wake_up_idle);
+#endif
 
+#ifdef CONFIG_SMP
 /*
  * Precomputed \Sum y^k { 1<=k<=n, where n%32=0). Values are rolled down to
  * lower integers. See Documentation/scheduler/sched-avg.txt how these
@@ -10803,7 +10805,6 @@ no_move:
 				busiest->active_balance = 1;
 				busiest->push_cpu = this_cpu;
 				active_balance = 1;
-				mark_reserved(this_cpu);
 			}
 			raw_spin_unlock_irqrestore(&busiest->lock, flags);
 
