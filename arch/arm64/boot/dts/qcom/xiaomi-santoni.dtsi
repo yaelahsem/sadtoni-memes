@@ -342,3 +342,7 @@
     /delete-property/ pinctrl-0;
     /delete-property/ pinctrl-1;
 };
+
+&apps_iommu {
+	qcom,no-aarch64;
+};
