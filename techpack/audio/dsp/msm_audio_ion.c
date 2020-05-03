@@ -22,7 +22,6 @@
 #include <linux/dma-mapping.h>
 #include <linux/dma-buf.h>
 #include <linux/iommu.h>
-#include <linux/qcom_iommu.h>
 #include <linux/platform_device.h>
 #include <ipc/apr.h>
 #include <linux/of_device.h>
@@ -737,25 +736,22 @@ err:
 static int msm_audio_smmu_init(struct device *dev)
 {
 	struct dma_iommu_mapping *mapping;
-	struct device *cb_dev;
 	int ret;
 
-	cb_dev = msm_iommu_get_ctx("adsp_io");
-
-	mapping = arm_iommu_create_mapping(msm_iommu_get_bus(cb_dev),
+	mapping = arm_iommu_create_mapping(&platform_bus_type,
 					   MSM_AUDIO_ION_VA_START,
 					   MSM_AUDIO_ION_VA_LEN);
 	if (IS_ERR(mapping))
 		return PTR_ERR(mapping);
 
-	ret = arm_iommu_attach_device(cb_dev, mapping);
+	ret = arm_iommu_attach_device(dev, mapping);
 	if (ret) {
-		dev_err(dev, "%s: Attach failed for %s, err = %d\n",
-			__func__, dev_name(cb_dev), ret);
+		dev_err(dev, "%s: Attach failed, err = %d\n",
+			__func__, ret);
 		goto fail_attach;
 	}
 
-	msm_audio_ion_data.cb_dev = cb_dev;
+	msm_audio_ion_data.cb_dev = dev;
 	msm_audio_ion_data.mapping = mapping;
 	INIT_LIST_HEAD(&msm_audio_ion_data.alloc_list);
 	mutex_init(&(msm_audio_ion_data.list_mutex));
@@ -803,7 +799,6 @@ static int msm_audio_ion_probe(struct platform_device *pdev)
 	int rc = 0;
 	const char *msm_audio_ion_dt = "qcom,smmu-enabled";
 	const char *msm_audio_ion_smmu = "qcom,smmu-version";
-	const char *msm_audio_ion_smmu_sid = "qcom,smmu-sid";
 	const char *msm_audio_ion_smmu_sid_mask = "qcom,smmu-sid-mask";
 	bool smmu_enabled;
 	enum apr_subsys_state q6_state;
@@ -853,30 +848,21 @@ static int msm_audio_ion_probe(struct platform_device *pdev)
 
 		/* Get SMMU SID information from Devicetree */
 		rc = of_property_read_u64(dev->of_node,
-					  msm_audio_ion_smmu_sid,
-					  &smmu_sid);
+					  msm_audio_ion_smmu_sid_mask,
+					  &smmu_sid_mask);
 		if (rc) {
 			dev_err(dev,
-				"%s: qcom,smmu-sid missing in DT node, using iommus\n",
+				"%s: qcom,smmu-sid-mask missing in DT node, using default\n",
 				__func__);
-			/* Get SMMU SID mask information from Devicetree */
-			rc = of_property_read_u64(dev->of_node,
-						  msm_audio_ion_smmu_sid_mask,
-						  &smmu_sid_mask);
-			if (rc) {
-				dev_err(dev, "%s: qcom,smmu-sid-mask missing in DT node, using default\n",
-					__func__);
-				smmu_sid_mask = 0xFFFFFFFFFFFFFFFF;
-			}
-
-			rc = of_parse_phandle_with_args(dev->of_node, "iommus",
-							"#iommu-cells", 0, &iommuspec);
-			if (rc)
-				dev_err(dev, "%s: could not get smmu SID, ret = %d\n",
-					__func__, rc);
-			else
-				smmu_sid = (iommuspec.args[0] & smmu_sid_mask);
+			smmu_sid_mask = 0xFFFFFFFFFFFFFFFF;
 		}
+		rc = of_parse_phandle_with_args(dev->of_node, "iommus",
+						"#iommu-cells", 0, &iommuspec);
+		if (rc)
+			dev_err(dev, "%s: could not get smmu SID, ret = %d\n",
+				__func__, rc);
+		else
+			smmu_sid = (iommuspec.args[0] & smmu_sid_mask);
 
 		msm_audio_ion_data.smmu_sid_bits =
 			smmu_sid << MSM_AUDIO_SMMU_SID_OFFSET;
