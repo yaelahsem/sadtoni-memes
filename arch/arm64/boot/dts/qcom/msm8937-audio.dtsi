@@ -50,9 +50,11 @@
 
 		qcom,msm-ext-pa = "primary";
 		qcom,msm-mclk-freq = <9600000>;
-		qcom,msm-mbhc-hphl-swh = <0>;
+		qcom,msm-mbhc-hphl-swh = <1>;
 		qcom,msm-mbhc-gnd-swh = <0>;
-		qcom,msm-hs-micbias-type = "external";
+		qcom,msm-hs-micbias-type = "internal";
+		ext-spk-amp-gpio = <&tlmm 124 0>;
+		headset-gpio = <&tlmm 129 0>;
 		qcom,msm-micbias1-ext-cap;
 
 		qcom,audio-routing =
@@ -62,10 +64,10 @@
 				"RX_I2S_CLK", "MCLK",
 				"TX_I2S_CLK", "MCLK",
 				"MIC BIAS External", "Handset Mic",
-				"MIC BIAS External2", "Headset Mic",
+				"MIC BIAS Internal2", "Headset Mic",
 				"MIC BIAS External", "Secondary Mic",
 				"AMIC1", "MIC BIAS External",
-				"AMIC2", "MIC BIAS External2",
+				"AMIC2", "MIC BIAS Internal2",
 				"AMIC3", "MIC BIAS External",
 				"ADC1_IN", "ADC1_OUT",
 				"ADC2_IN", "ADC2_OUT",
@@ -156,7 +158,7 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 		wsa881x_i2c_f: wsa881x-i2c-codec@f {
-			status = "okay";
+			status = "disabled";
 			compatible = "qcom,wsa881x-i2c-codec";
 			reg = <0x0f>;
 			qcom,wsa-analog-vi-gpio = <&wsa881x_analog_vi_gpio>;
@@ -165,7 +167,7 @@
 				<&wsa881x_analog_reset_gpio>;
 		};
 		wsa881x_i2c_45: wsa881x-i2c-codec@45 {
-			status = "okay";
+			status = "disabled";
 			compatible = "qcom,wsa881x-i2c-codec";
 			reg = <0x45>;
 		};
