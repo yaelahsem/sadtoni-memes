@@ -607,12 +607,11 @@
 			qcom,int-pwm-freq-khz = <505>;
 			qcom,play-mode = "direct";
 			qcom,wave-play-rate-us = <5263>;
-			qcom,actuator-type = <0>;
+			qcom,actuator-type = <1>;
 			qcom,wave-shape = "square";
-			qcom,vmax-mv = <2000>;
+			qcom,vmax-mv = <2700>;
 			qcom,ilim-ma = <800>;
 			qcom,sc-deb-cycles = <8>;
-			qcom,en-brake;
 			qcom,brake-pattern = <0x3 0x3 0x0 0x0>;
 			qcom,wave-samples = <0x3e 0x3e 0x3e 0x3e 0x3e
 							0x3e 0x3e 0x3e>;
