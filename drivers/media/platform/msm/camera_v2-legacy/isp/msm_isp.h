@@ -20,7 +20,7 @@
 #include <linux/list.h>
 #include <linux/delay.h>
 #include <media/v4l2-subdev.h>
-#include <media/msmb_isp.h>
+#include <media/msmb_isp-legacy.h>
 #include <linux/msm-bus.h>
 #include <linux/msm-bus-board.h>
 
