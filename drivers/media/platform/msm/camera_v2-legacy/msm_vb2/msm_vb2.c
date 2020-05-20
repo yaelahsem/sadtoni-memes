@@ -121,7 +121,6 @@ static void msm_vb2_stop_stream(struct vb2_queue *q)
 	struct msm_vb2_buffer *msm_vb2, *temp;
 	struct msm_stream *stream;
 	unsigned long flags;
-	struct vb2_buffer *vb2_buf;
 	struct vb2_v4l2_buffer *vb2_v4l2_buf;
 
 	stream = msm_get_stream_from_vb2q(q);
