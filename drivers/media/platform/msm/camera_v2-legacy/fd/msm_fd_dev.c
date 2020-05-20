@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -173,22 +173,20 @@ static int msm_fd_fill_format_from_ctx(struct v4l2_format *f, struct fd_ctx *c)
  * @alloc_ctxs: Array of allocated contexts for each plane.
  */
 static int msm_fd_queue_setup(struct vb2_queue *q,
-//	const void *parg,
+	const struct v4l2_format *fmt,
 	unsigned int *num_buffers, unsigned int *num_planes,
-	unsigned int sizes[], struct device *alloc_ctxs[])
+	unsigned int sizes[], void *alloc_ctxs[])
 {
 	struct fd_ctx *ctx = vb2_get_drv_priv(q);
-	//const struct v4l2_format *fmt = parg;
-	const struct v4l2_format *fmt = NULL;
 
 	*num_planes = 1;
 
-	if (fmt == NULL)
+	if (NULL == fmt)
 		sizes[0] = ctx->format.sizeimage;
 	else
 		sizes[0] = fmt->fmt.pix.sizeimage;
 
-	alloc_ctxs[0] = (struct device *)&ctx->mem_pool;
+	alloc_ctxs[0] = &ctx->mem_pool;
 
 	return 0;
 }
@@ -288,11 +286,10 @@ static struct vb2_ops msm_fd_vb2_q_ops = {
  * @size: Size of the buffer
  * @write: True if buffer will be used for writing the data.
  */
-static void *msm_fd_get_userptr(struct device *alloc_ctx,
-	unsigned long vaddr, unsigned long size,
-	enum dma_data_direction dma_dir)
+static void *msm_fd_get_userptr(void *alloc_ctx,
+	unsigned long vaddr, unsigned long size, int write)
 {
-	struct msm_fd_mem_pool *pool = (void *)alloc_ctx;
+	struct msm_fd_mem_pool *pool = alloc_ctx;
 	struct msm_fd_buf_handle *buf;
 	int ret;
 
@@ -343,7 +340,7 @@ static int msm_fd_vbif_error_handler(void *handle, uint32_t error)
 	int ret;
 
 	if (NULL == handle) {
-		dev_err(fd->dev, "FD Ctx is null, Cannot recover\n");
+		pr_err("FD Ctx is null, Cannot recover\n");
 		return 0;
 	}
 	ctx = (struct fd_ctx *)handle;
@@ -435,7 +432,6 @@ static int msm_fd_open(struct file *file)
 	ctx->vb2_q.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 	ctx->vb2_q.io_modes = VB2_USERPTR;
 	ctx->vb2_q.timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
-	mutex_init(&ctx->lock);
 	ret = vb2_queue_init(&ctx->vb2_q);
 	if (ret < 0) {
 		dev_err(device->dev, "Error queue init\n");
@@ -486,9 +482,7 @@ static int msm_fd_release(struct file *file)
 	msm_cpp_vbif_register_error_handler((void *)ctx,
 		VBIF_CLIENT_FD, NULL);
 
-	mutex_lock(&ctx->lock);
 	vb2_queue_release(&ctx->vb2_q);
-	mutex_unlock(&ctx->lock);
 
 	vfree(ctx->stats);
 
@@ -518,9 +512,7 @@ static unsigned int msm_fd_poll(struct file *file,
 	struct fd_ctx *ctx = msm_fd_ctx_from_fh(file->private_data);
 	unsigned int ret;
 
-	mutex_lock(&ctx->lock);
 	ret = vb2_poll(&ctx->vb2_q, file, wait);
-	mutex_unlock(&ctx->lock);
 
 	if (atomic_read(&ctx->subscribed_for_event)) {
 		poll_wait(file, &ctx->fh.wait, wait);
@@ -755,13 +747,9 @@ static int msm_fd_s_fmt_vid_out(struct file *file,
 static int msm_fd_reqbufs(struct file *file,
 	void *fh, struct v4l2_requestbuffers *req)
 {
-	int ret;
 	struct fd_ctx *ctx = msm_fd_ctx_from_fh(fh);
 
-	mutex_lock(&ctx->lock);
-	ret = vb2_reqbufs(&ctx->vb2_q, req);
-	mutex_unlock(&ctx->lock);
-	return ret;
+	return vb2_reqbufs(&ctx->vb2_q, req);
 }
 
 /*
@@ -773,14 +761,9 @@ static int msm_fd_reqbufs(struct file *file,
 static int msm_fd_qbuf(struct file *file, void *fh,
 	struct v4l2_buffer *pb)
 {
-	int ret;
 	struct fd_ctx *ctx = msm_fd_ctx_from_fh(fh);
 
-	mutex_lock(&ctx->lock);
-	ret = vb2_qbuf(&ctx->vb2_q, pb);
-	mutex_unlock(&ctx->lock);
-	return ret;
-
+	return vb2_qbuf(&ctx->vb2_q, pb);
 }
 
 /*
@@ -792,13 +775,9 @@ static int msm_fd_qbuf(struct file *file, void *fh,
 static int msm_fd_dqbuf(struct file *file,
 	void *fh, struct v4l2_buffer *pb)
 {
-	int ret;
 	struct fd_ctx *ctx = msm_fd_ctx_from_fh(fh);
 
-	mutex_lock(&ctx->lock);
-	ret = vb2_dqbuf(&ctx->vb2_q, pb, file->f_flags & O_NONBLOCK);
-	mutex_unlock(&ctx->lock);
-	return ret;
+	return vb2_dqbuf(&ctx->vb2_q, pb, file->f_flags & O_NONBLOCK);
 }
 
 /*
@@ -813,9 +792,7 @@ static int msm_fd_streamon(struct file *file,
 	struct fd_ctx *ctx = msm_fd_ctx_from_fh(fh);
 	int ret;
 
-	mutex_lock(&ctx->lock);
 	ret = vb2_streamon(&ctx->vb2_q, buf_type);
-	mutex_unlock(&ctx->lock);
 	if (ret < 0)
 		dev_err(ctx->fd_device->dev, "Stream on fails\n");
 
@@ -834,9 +811,7 @@ static int msm_fd_streamoff(struct file *file,
 	struct fd_ctx *ctx = msm_fd_ctx_from_fh(fh);
 	int ret;
 
-	mutex_lock(&ctx->lock);
 	ret = vb2_streamoff(&ctx->vb2_q, buf_type);
-	mutex_unlock(&ctx->lock);
 	if (ret < 0)
 		dev_err(ctx->fd_device->dev, "Stream off fails\n");
 
@@ -1255,7 +1230,7 @@ static void msm_fd_wq_handler(struct work_struct *work)
 		dev_err(fd->dev, "Oops no active buffer empty queue\n");
 		return;
 	}
-	ctx = vb2_get_drv_priv(active_buf->vb_v4l2_buf.vb2_buf.vb2_queue);
+	ctx = vb2_get_drv_priv(active_buf->vb.vb2_queue);
 
 	/* Increment sequence number, 0 means sequence is not valid */
 	ctx->sequence++;
@@ -1285,15 +1260,15 @@ static void msm_fd_wq_handler(struct work_struct *work)
 	msm_fd_hw_schedule_next_buffer(fd);
 
 	/* Return buffer to vb queue */
-	active_buf->vb_v4l2_buf.sequence = ctx->fh.sequence;
-	vb2_buffer_done(&active_buf->vb_v4l2_buf.vb2_buf, VB2_BUF_STATE_DONE);
+	active_buf->vb.v4l2_buf.sequence = ctx->fh.sequence;
+	vb2_buffer_done(&active_buf->vb, VB2_BUF_STATE_DONE);
 
 	/* Sent event */
 	memset(&event, 0x00, sizeof(event));
 	event.type = MSM_EVENT_FD;
 	fd_event = (struct msm_fd_event *)event.u.data;
 	fd_event->face_cnt = stats->face_cnt;
-	fd_event->buf_index = active_buf->vb_v4l2_buf.vb2_buf.index;
+	fd_event->buf_index = active_buf->vb.v4l2_buf.index;
 	fd_event->frame_id = ctx->sequence;
 	v4l2_event_queue_fh(&ctx->fh, &event);
 

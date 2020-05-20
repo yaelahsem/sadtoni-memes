@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -18,8 +18,8 @@
 #include <linux/platform_device.h>
 #include <media/v4l2-subdev.h>
 #include <linux/workqueue.h>
-#include <media/msm_cam_sensor-legacy.h>
-#include <soc/qcom/camera2-legacy.h>
+#include <media/msm_cam_sensor.h>
+#include <soc/qcom/camera2.h>
 #include "msm_sd.h"
 #include "cam_soc_api.h"
 
@@ -125,7 +125,6 @@ struct msm_camera_cci_master_info {
 	struct mutex mutex_q[NUM_QUEUES];
 	struct completion report_q[NUM_QUEUES];
 	atomic_t done_pending[NUM_QUEUES];
-	spinlock_t lock_q[NUM_QUEUES];
 };
 
 struct msm_cci_clk_params_t {

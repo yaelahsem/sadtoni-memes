@@ -18,15 +18,15 @@
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <media/v4l2-subdev.h>
-#include <media/msmb_camera-legacy.h>
-#include <media/msmb_generic_buf_mgr-legacy.h>
+#include <media/msmb_camera.h>
+#include <media/msmb_generic_buf_mgr.h>
 
 #include "msm.h"
 #include "msm_sd.h"
 
 struct msm_get_bufs {
 	struct list_head entry;
-	struct vb2_v4l2_buffer *vb2_v4l2_buf;
+	struct vb2_buffer *vb2_buf;
 	uint32_t session_id;
 	uint32_t stream_id;
 	uint32_t index;

@@ -14,7 +14,6 @@
 
 #include "msm_isp.h"
 
-#define HANDLE_TO_IDX(handle) (handle & 0xFF)
 #define SRC_TO_INTF(src) \
 	((src < RDI_INTF_0 || src == VFE_AXI_SRC_MAX) ? VFE_PIX_0 : \
 	(VFE_RAW_0 + src - RDI_INTF_0))
@@ -50,8 +49,6 @@ void msm_isp_reset_framedrop(struct vfe_device *vfe_dev,
 	struct msm_vfe_axi_stream *stream_info);
 
 int msm_isp_request_axi_stream(struct vfe_device *vfe_dev, void *arg);
-void msm_isp_start_avtimer(void);
-void msm_isp_stop_avtimer(void);
 void msm_isp_get_avtimer_ts(struct msm_isp_timestamp *time_stamp);
 int msm_isp_cfg_axi_stream(struct vfe_device *vfe_dev, void *arg);
 int msm_isp_update_stream_bandwidth(struct vfe_device *vfe_dev,

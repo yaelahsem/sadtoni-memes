@@ -13,7 +13,7 @@
 #ifndef _MSM_ISP_BUF_H_
 #define _MSM_ISP_BUF_H_
 
-#include <media/msmb_isp-legacy.h>
+#include <media/msmb_isp.h>
 #include "msm_sd.h"
 
 /* Buffer type could be userspace / HAL.
@@ -106,7 +106,7 @@ struct msm_isp_buffer {
 	struct msm_isp_buffer_debug_t buf_debug;
 
 	/*Vb2 buffer data*/
-	struct vb2_v4l2_buffer *vb2_v4l2_buf;
+	struct vb2_buffer *vb2_buf;
 };
 
 struct msm_isp_bufq {
