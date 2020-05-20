@@ -1,4 +1,5 @@
 /* Copyright (c) 2011-2016, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2018 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -654,6 +655,12 @@ static int msm_eeprom_config(struct msm_eeprom_ctrl_t *e_ctrl,
 		rc = msm_eeprom_get_cmm_data(e_ctrl, cdata);
 		break;
 	case CFG_EEPROM_INIT:
+		if (e_ctrl->userspace_probe == 0) {
+			pr_err("%s:%d Eeprom already probed at kernel boot",
+				__func__, __LINE__);
+			rc = -EINVAL;
+			break;
+		}
 		if (e_ctrl->cal_data.num_data == 0) {
 			rc = eeprom_init_config(e_ctrl, argp);
 			if (rc < 0) {
@@ -834,7 +841,8 @@ static int msm_eeprom_i2c_probe(struct i2c_client *client,
 	v4l2_set_subdevdata(&e_ctrl->msm_sd.sd, e_ctrl);
 	e_ctrl->msm_sd.sd.internal_ops = &msm_eeprom_internal_ops;
 	e_ctrl->msm_sd.sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
-	media_entity_pads_init(&e_ctrl->msm_sd.sd.entity, 0, NULL);
+	media_entity_init(&e_ctrl->msm_sd.sd.entity, 0, NULL, 0);
+	e_ctrl->msm_sd.sd.entity.type = MEDIA_ENT_T_V4L2_SUBDEV;
 	e_ctrl->msm_sd.sd.entity.group_id = MSM_CAMERA_SUBDEV_EEPROM;
 	msm_sd_register(&e_ctrl->msm_sd);
 	CDBG("%s success result=%d X\n", __func__, rc);
@@ -1195,7 +1203,8 @@ static int msm_eeprom_spi_setup(struct spi_device *spi)
 	v4l2_set_subdevdata(&e_ctrl->msm_sd.sd, e_ctrl);
 	e_ctrl->msm_sd.sd.internal_ops = &msm_eeprom_internal_ops;
 	e_ctrl->msm_sd.sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
-	media_entity_pads_init(&e_ctrl->msm_sd.sd.entity, 0, NULL);
+	media_entity_init(&e_ctrl->msm_sd.sd.entity, 0, NULL, 0);
+	e_ctrl->msm_sd.sd.entity.type = MEDIA_ENT_T_V4L2_SUBDEV;
 	e_ctrl->msm_sd.sd.entity.group_id = MSM_CAMERA_SUBDEV_EEPROM;
 	msm_sd_register(&e_ctrl->msm_sd);
 	e_ctrl->is_supported = (e_ctrl->is_supported << 1) | 1;
@@ -1507,6 +1516,7 @@ static int msm_eeprom_config32(struct msm_eeprom_ctrl_t *e_ctrl,
 		rc = eeprom_config_read_cal_data32(e_ctrl, argp);
 		break;
 	case CFG_EEPROM_INIT:
+
 		if (e_ctrl->cal_data.num_data == 0) {
 			rc = eeprom_init_config32(e_ctrl, argp);
 			if (rc < 0)
@@ -1659,6 +1669,8 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 		&eb_info->eeprom_name);
 	CDBG("%s qcom,eeprom-name %s, rc %d\n", __func__,
 		eb_info->eeprom_name, rc);
+	printk("%s qcom,eeprom-name %s, rc %d\n", __func__,
+			eb_info->eeprom_name, rc);
 	if (rc < 0) {
 		pr_err("%s failed %d\n", __func__, __LINE__);
 		e_ctrl->userspace_probe = 1;
@@ -1959,7 +1971,8 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 	e_ctrl->msm_sd.sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
 	snprintf(e_ctrl->msm_sd.sd.name,
 		ARRAY_SIZE(e_ctrl->msm_sd.sd.name), "msm_eeprom");
-	media_entity_pads_init(&e_ctrl->msm_sd.sd.entity, 0, NULL);
+	media_entity_init(&e_ctrl->msm_sd.sd.entity, 0, NULL, 0);
+	e_ctrl->msm_sd.sd.entity.type = MEDIA_ENT_T_V4L2_SUBDEV;
 	e_ctrl->msm_sd.sd.entity.group_id = MSM_CAMERA_SUBDEV_EEPROM;
 	msm_sd_register(&e_ctrl->msm_sd);
 

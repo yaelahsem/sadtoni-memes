@@ -15,7 +15,7 @@
 #include <linux/clk/msm-clk.h>
 #include <linux/clk/msm-clk-provider.h>
 #include <linux/delay.h>
-#include <media/msmb_pproc-legacy.h>
+#include <media/msmb_pproc.h>
 #include "msm_cpp.h"
 
 

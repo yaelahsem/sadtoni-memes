@@ -17,7 +17,7 @@
 #include <linux/io.h>
 #include <linux/platform_device.h>
 #include <media/v4l2-subdev.h>
-#include <media/msm_cam_sensor-legacy.h>
+#include <media/msm_cam_sensor.h>
 #include "msm_sd.h"
 #include "msm_camera_io_util.h"
 #include "msm_camera_dt_util.h"
@@ -169,7 +169,6 @@ struct csiphy_device {
 	uint8_t num_irq_registers;
 	uint32_t csiphy_sof_debug;
 	uint32_t csiphy_sof_debug_count;
-	uint32_t is_combo_mode;
 	struct camera_vreg_t *csiphy_vreg;
 	struct regulator *csiphy_reg_ptr[MAX_REGULATOR];
 	int32_t regulator_count;

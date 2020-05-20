@@ -22,7 +22,7 @@
 #include <linux/slab.h>
 #include <linux/device.h>
 #include <linux/uaccess.h>
-#include <media/msm_jpeg-legacy.h>
+#include <media/msm_jpeg.h>
 #include <media/v4l2-device.h>
 #include <media/v4l2-subdev.h>
 
@@ -31,8 +31,6 @@
 
 #define MSM_JPEG_NAME "jpeg"
 #define DEV_NAME_LEN 10
-
-static char devname[DEV_NAME_LEN];
 
 static int msm_jpeg_open(struct inode *inode, struct file *filp)
 {
@@ -187,6 +185,7 @@ static int msm_jpeg_init_dev(struct platform_device *pdev)
 	struct msm_jpeg_device *msm_jpeg_device_p;
 	const struct of_device_id *device_id;
 	const struct msm_jpeg_priv_data *priv_data;
+	char devname[DEV_NAME_LEN];
 
 	msm_jpeg_device_p = kzalloc(sizeof(struct msm_jpeg_device), GFP_ATOMIC);
 	if (!msm_jpeg_device_p) {
