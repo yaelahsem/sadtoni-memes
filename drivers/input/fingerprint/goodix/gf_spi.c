@@ -377,18 +377,20 @@ static long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		__put_user(gf_dev->fb_black, (u8 __user *) arg);
 		break;
 	case GF_IOC_POWER_ON:
-		if (gf_dev->device_available == 1)
+		if (gf_dev->device_available == 1) {
 			pr_info("Sensor has already powered-on.\n");
-		else
+		} else {
 			gf_power_on(gf_dev);
 			gf_dev->device_available = 1;
+		}
 		break;
 	case GF_IOC_POWER_OFF:
-		if (gf_dev->device_available == 0)
+		if (gf_dev->device_available == 0) {
 			pr_info("Sensor has already powered-off.\n");
-		else
+		} else {
 			gf_power_off(gf_dev);
 			gf_dev->device_available = 0;
+		}
 		break;
 		default:
 		gf_dbg("Unsupport cmd:0x%x\n", cmd);
@@ -774,20 +776,19 @@ static int gf_remove(struct platform_device *pdev)
 	if (gf_dev->irq)
 		free_irq(gf_dev->irq, gf_dev);
 
-	if (gf_dev->input != NULL)
+	if (gf_dev->input != NULL) {
 		input_unregister_device(gf_dev->input);
 		input_free_device(gf_dev->input);
-
+	}
 
 	mutex_lock(&device_list_lock);
 	list_del(&gf_dev->device_entry);
 	device_destroy(gf_class, gf_dev->devt);
 	clear_bit(MINOR(gf_dev->devt), minors);
-	if (gf_dev->users == 0)
+	if (gf_dev->users == 0) {
 		kfree(gf_dev);
-
-		 mutex_unlock(&device_list_lock);
-
+		mutex_unlock(&device_list_lock);
+	}
 	wakeup_source_trash(&gf_dev->ttw_wl);
 
 	FUNC_EXIT();
