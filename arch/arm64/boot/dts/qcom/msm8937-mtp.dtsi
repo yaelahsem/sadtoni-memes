@@ -11,6 +11,8 @@
  * GNU General Public License for more details.
  */
 
+#include "msm8937-camera-sensor-mtp.dtsi"
+
 #include "msm8937-pinctrl.dtsi"
 &blsp1_uart2 {
 	status = "ok";
@@ -23,7 +25,6 @@
 	vdd-supply = <&pm8937_l8>;
 	qcom,vdd-voltage-level = <2900000 2900000>;
 	qcom,vdd-current-level = <200 570000>;
-	qcom,vdd-always-on;
 
 	/* device communication power supply */
 	vdd-io-supply = <&pm8937_l5>;
