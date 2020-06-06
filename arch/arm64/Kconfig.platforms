@@ -189,6 +189,10 @@ config MACH_XIAOMI_SANTONI
 	bool "Enable Support for XIAOMI Redmi 4X (Santoni)"
 	depends on ARCH_MSM8940
 
+config MACH_XIAOMI_SANTONI_TREBLE
+        bool "Enable Treble Support for XIAOMI Redmi 4X (Santoni)"
+        depends on MACH_XIAOMI_SANTONI
+
 config ARCH_MSM8917
 	bool "Enable Support for Qualcomm Technologies Inc. MSM8917"
 	depends on ARCH_QCOM
