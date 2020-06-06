@@ -26,8 +26,12 @@
 
 &firmware {
 	android {
+		/delete-node/ vbmeta;
 		fstab {
-			/delete-node/ vendor;
+			vendor {
+				dev = "/dev/block/platform/soc/7824900.sdhci/by-name/cust";
+				fsmgr_flags = "wait";
+			};
 			system {
 				compatible = "android,system";
 				dev = "/dev/block/platform/soc/7824900.sdhci/by-name/system";
