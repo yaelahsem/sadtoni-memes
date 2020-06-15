@@ -415,7 +415,6 @@ static irqreturn_t gf_irq(int irq, void *handle)
 
 #if defined(GF_NETLINK_ENABLE)
 
-	struct gf_dev *gf_dev = &gf;
 	char temp = GF_NET_EVENT_IRQ;
 	gf_dbg("enter irq %s\n", __func__);
 
