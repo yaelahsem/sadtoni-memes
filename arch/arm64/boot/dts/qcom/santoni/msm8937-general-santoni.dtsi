@@ -32,6 +32,14 @@
 	qcom,vchg-adc-channel-id = <3>;
 };
 
+&pm8937_vadc {
+	/delete-node/ chan@11;
+};
+
+&thermal_zones {
+	/delete-node/ pa-therm1-adc;
+};
+
 &qpnp_fg {
 	qcom,battery-data = <&qrd_batterydata>;
 	qcom,cold-bat-decidegc = <(0)>;
