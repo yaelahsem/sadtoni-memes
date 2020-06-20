@@ -788,10 +788,12 @@ void Ft5336_TestRawDataAndDiff()
 			else
 				change_vol = org_vol - g_testparam.changevol_level;
 		}
-		if(change_vol > 7)
-	    	change_vol = 7;
-	    else if(change_vol <= 0)
-	    	change_vol = 0;
+		if(change_vol > 7) {
+			change_vol = 7;
+		} else if(change_vol <= 0) {
+		    	change_vol = 0;
+		}
+
 		SetDriverVol((unsigned char)change_vol);
 		end_vol = change_vol;
 		for(i=0; i<4; i++)
