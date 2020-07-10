@@ -5578,8 +5578,10 @@ static int sdhci_msm_suspend(struct device *dev)
 	}
 	ret = sdhci_msm_runtime_suspend(dev);
 out:
+#ifdef CONFIG_MMC_CLKGATE
 	/* cancel any clock gating work scheduled by mmc_host_clk_release() */
 	cancel_delayed_work_sync(&mmc->clk_gate_work);
+#endif
 	sdhci_msm_disable_controller_clock(host);
 	if (host->mmc->card && mmc_card_sdio(host->mmc->card)) {
 		sdio_cfg = sdhci_msm_cfg_sdio_wakeup(host, true);
