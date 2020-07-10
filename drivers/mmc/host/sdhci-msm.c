@@ -5562,7 +5562,9 @@ static int sdhci_msm_suspend(struct device *dev)
 	struct sdhci_host *host = dev_get_drvdata(dev);
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_msm_host *msm_host = pltfm_host->priv;
+#ifdef CONFIG_MMC_CLKGATE
 	struct mmc_host *mmc = host->mmc;
+#endif
 	int ret = 0;
 	int sdio_cfg = 0;
 	ktime_t start = ktime_get();
