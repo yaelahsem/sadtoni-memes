@@ -601,6 +601,7 @@ static int32_t msm_sensor_get_power_settings(void *setting,
 		power_info);
 	if (rc < 0) {
 		pr_err("failed");
+		kfree(power_info->power_setting);
 		return -EINVAL;
 	}
 	return rc;
@@ -641,6 +642,9 @@ static void msm_sensor_fill_sensor_info(struct msm_sensor_ctrl_t *s_ctrl,
 
 	strlcpy(entity_name, s_ctrl->msm_sd.sd.entity.name, MAX_SENSOR_NAME);
 }
+
+extern int main_module_id;
+extern int sub_module_id;
 
 ssize_t kobj_fusion_id_show_back(struct kobject *kobject, struct attribute *attr, char *buf);
 struct attribute camera_attr_back = {
@@ -878,7 +882,12 @@ int32_t msm_sensor_driver_probe(void *setting,
 		slave_info->camera_id = slave_info32->camera_id;
 
 		slave_info->i2c_freq_mode = slave_info32->i2c_freq_mode;
-		slave_info->sensor_id_info = slave_info32->sensor_id_info;
+		slave_info->sensor_id_info.sensor_id_reg_addr =
+			slave_info32->sensor_id_info.sensor_id_reg_addr;
+		slave_info->sensor_id_info.sensor_id_mask =
+			slave_info32->sensor_id_info.sensor_id_mask;
+		slave_info->sensor_id_info.sensor_id =
+				slave_info32->sensor_id_info.sensor_id;
 
 		slave_info->slave_addr = slave_info32->slave_addr;
 		slave_info->power_setting_array.size =
@@ -932,6 +941,92 @@ int32_t msm_sensor_driver_probe(void *setting,
 		rc = -EINVAL;
 		goto free_slave_info;
 	}
+
+
+	if (!strcmp(slave_info->sensor_name, "s5k3l8_ofilm")) {
+		if (main_module_id != 7) {
+			pr_err("failed: main_module_id %d, sensor is not %s", main_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	}  else if (!strcmp(slave_info->sensor_name, "s5k3l8_ofilm_riva")) {
+		if (main_module_id != 7) {
+			pr_err("failed: main_module_id %d, sensor is not %s", main_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	}  else if (!strcmp(slave_info->sensor_name, "s5k3l8_sunny")) {
+		if (main_module_id != 1) {
+			pr_err("failed: main_module_id %d, sensor is not %s", main_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	} else if (!strcmp(slave_info->sensor_name, "ov13855_sunny")) {
+		if (main_module_id != 1) {
+			pr_err("failed: main_module_id %d, sensor is not %s", main_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	} else if (!strcmp(slave_info->sensor_name, "ov13855_qtech")) {
+		if (main_module_id != 11) {
+			pr_err("failed: main_module_id %d, sensor is not %s", main_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	}  else if (!strcmp(slave_info->sensor_name, "ov13850_q13v06k")) {
+		if (main_module_id != 1) {
+			pr_err("failed: main_module_id %d, sensor is not %s", main_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	} else if (!strcmp(slave_info->sensor_name, "s5k3l2")) {
+		if (main_module_id != 7) {
+			pr_err("failed: main_module_id %d, sensor is not %s", main_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	}  else if (!strcmp(slave_info->sensor_name, "ov5675_ofilm")) {
+		if (sub_module_id != 7) {
+			pr_err("failed: sub_module_id %d, sensor is not %s", sub_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	} else if (!strcmp(slave_info->sensor_name, "s5k5e8_sunny")) {
+		if (sub_module_id != 1) {
+			pr_err("failed: sub_module_id %d, sensor is not %s", sub_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	}  else if (!strcmp(slave_info->sensor_name, "ov5675")) {
+		if (sub_module_id != 1) {
+			pr_err("failed: sub_module_id %d, sensor is not %s", sub_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	}  else if (!strcmp(slave_info->sensor_name, "s5k5e8_ofilm")) {
+		if (sub_module_id != 7) {
+			pr_err("failed: sub_module_id %d, sensor is not %s", sub_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	}  else if (!strcmp(slave_info->sensor_name, "s5k5e8_qtech_riva")) {
+		if (sub_module_id != 11) {
+			pr_err("failed: sub_module_id %d, sensor is not %s", sub_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	}  else if (!strcmp(slave_info->sensor_name, "s5k5e8_ofilm_riva")) {
+		if (sub_module_id != 7) {
+			pr_err("failed: sub_module_id %d, sensor is not %s", sub_module_id, slave_info->sensor_name);
+			rc = -EINVAL;
+			goto free_slave_info;
+		}
+	}  else {
+		pr_err("sensor name is %s, is nothing to do", slave_info->sensor_name);
+		rc = -EINVAL;
+		goto free_slave_info;
+	}
+	printk("camera sensor probe %s\n", slave_info->sensor_name);
 
 	if (!kobj_back.state_initialized)
 		rc = kobject_init_and_add(&kobj_back,  &ktype_back, NULL, "camera_fusion_id_back");
@@ -989,7 +1084,7 @@ int32_t msm_sensor_driver_probe(void *setting,
 
 	camera_info = kzalloc(sizeof(struct msm_camera_slave_info), GFP_KERNEL);
 	if (!camera_info)
-		goto free_slave_info;
+		goto free_power_settings;
 
 	s_ctrl->sensordata->slave_info = camera_info;
 
@@ -1157,6 +1252,9 @@ camera_power_down:
 	s_ctrl->func_tbl->sensor_power_down(s_ctrl);
 free_camera_info:
 	kfree(camera_info);
+free_power_settings:
+	kfree(s_ctrl->sensordata->power_info.power_setting);
+	kfree(s_ctrl->sensordata->power_info.power_down_setting);
 free_slave_info:
 	kfree(slave_info);
 	return rc;
