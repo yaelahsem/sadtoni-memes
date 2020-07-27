@@ -18,7 +18,7 @@ obj-$(CONFIG_CRYPTO_GHASH_ARM64_CE) += ghash-ce.o
 ghash-ce-y := ghash-ce-glue.o ghash-ce-core.o
 
 obj-$(CONFIG_CRYPTO_AES_ARM64_CE) += aes-ce-cipher.o
-aes-ce-cipher-y := aes-ce-cipher-glue.o aes-ce-cipher-core.o
+aes-ce-cipher-y := aes-ce-core.o aes-ce-glue.o
 ifdef CONFIG_ARCH_MSM8937
 CFLAGS_aes-ce-cipher-core.o += -mcpu=cortex-a53+crypto -Wa,-mcpu=cortex-a53+crypto -mtune=cortex-a53
 else
@@ -34,6 +34,9 @@ aes-ce-blk-y := aes-glue-ce.o aes-ce.o
 
 obj-$(CONFIG_CRYPTO_AES_ARM64_NEON_BLK) += aes-neon-blk.o
 aes-neon-blk-y := aes-glue-neon.o aes-neon.o
+
+obj-$(CONFIG_CRYPTO_AES_ARM64) += aes-arm64.o
+aes-arm64-y := aes-cipher-core.o aes-cipher-glue.o
 
 AFLAGS_aes-ce.o		:= -DINTERLEAVE=4
 AFLAGS_aes-neon.o	:= -DINTERLEAVE=4
